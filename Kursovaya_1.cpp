@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <string>
 #include <vector>
 #include <time.h>
@@ -116,11 +116,39 @@ int main() {
 }
 // в функции на вход подавать контейнер map ,где ключ - код игрока,а значение - кол-во фишек игрока.
 void Dices(map<int, int> &map_CodeChips,vector <int> &codes_dices_players,int size_codes_dices_players){
+	
 	cout << "Players ";
 	for (int i = 0; i < size_codes_dices_players; ++i) {
 		cout << codes_dices_players[i] << " ";
 	}
 	cout<<". Welcome to 'Dices' !" << endl;
+	cout << '\n';
+	cout << "Here is the rules" << endl;
+	cout << "Each participant receives 5 dice." << endl;
+	cout << "All '1' dropped out are considered jokers and can be counted as dice of any denomination." << endl;
+	cout << "The aim of the game is to save your bones" << endl;
+	map<int,int>mass_code_AmountDices;
+	int players = size_codes_dices_players;
+	bool believe = false;
+	for (int i = 0; i < players; ++i) {
+		mass_code_AmountDices[codes_dices_players[i]] = 5;
+	}
+	while (mass_code_AmountDices.size() >= 1) {
+		for (int i = 0; i < players; ++i) {
+			if (mass_code_AmountDices[codes_dices_players[i]] >= 1) {
+
+			}
+			else {
+				map_CodeChips[codes_dices_players[i]] -= 50;
+				mass_code_AmountDices.erase(codes_dices_players[i]);
+				cout << "Player " << codes_dices_players[i] << " quited the game" << endl;
+			}
+		}
+	}
+	
+
+
+	/*
 	const int times = 5;
 	int players = size_codes_dices_players;
 	int** arr_games_sums = new int* [players] {};  //воспользуемся двойным динамическим массивом
@@ -169,8 +197,9 @@ void Dices(map<int, int> &map_CodeChips,vector <int> &codes_dices_players,int si
 		delete[]arr_games_sums[i];
 	}
 	delete[]arr_games_sums;
+	*/
 }
-// коэффициенты для рулетки (выплата-ставка)  : число+цвет - 5 к 1  ; цвет - 2 к 1  ; четность - 2 к 1
+// коэффициенты для рулетки (выплата-ставка)  : число 5 к 1  ; цвет - 2 к 1  ; четность - 2 к 1
 void Roulette( map <int, int> &map_CodeChips, vector<int>& codes_Roulette_players, int size_codes_Roulette_players) {
 	cout << "Players ";
 	for (int i = 0; i < size_codes_Roulette_players; ++i) {
@@ -180,15 +209,26 @@ void Roulette( map <int, int> &map_CodeChips, vector<int>& codes_Roulette_player
 	vector<int>mass_winners;
 	srand(time(NULL));
 	int type_bet;
-	int color = rand() % 3;
-	int number = rand() % 37 + 1;
+	int color;
+	int possibility = rand() % 100;
+	int arr_roulette[37] = { 0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22,18, 29, 7, 28, 12, 35, 3, 26 };
+	int random = rand() % 37 ;
+	int number = arr_roulette[random];
+	if (random == 0) {
+		color = 0;
+	}
+	else {
+		color = random % 2 + 1;
+	}
+	
 	string parity[2] = { "even","odd" };
 	string arr_colors[3] = { "green","black","red"};
+	
 	for (int i = 0; i < size_codes_Roulette_players; ++i) {
 		string player_color = "*";
 		int player_number=-1;
 		string player_parity = "*";
-		cout << "Player " << codes_Roulette_players[i] << ", too bet on COLOR enter '1' , to bet on NUMBER && COLOR enter '2' , to bet on EVEN || ODD enter '3' "<<endl;
+		cout << "Player " << codes_Roulette_players[i] << ", too bet on COLOR enter '1' , to bet on NUMBER enter '2' , to bet on EVEN || ODD enter '3' "<<endl;
 		cin >> type_bet;
 		if (type_bet == 1) {
 			cout << " Make your bet (enter the color) ";
@@ -203,11 +243,10 @@ void Roulette( map <int, int> &map_CodeChips, vector<int>& codes_Roulette_player
 			}
 		}
 		if (type_bet == 2) {
-			cout << " Make your bet (Enter the number and color) " ;
+			cout << " Make your bet (Enter the number) " ;
 			cin >> player_number;
-			cin >> player_color;
-			cout << " Your bet is : " << player_number << " '" << player_color << "'" << endl;
-			if ((player_number == number)&&(player_color == arr_colors[color])){
+			cout << " Your bet is : " << player_number << " '" << endl;
+			if (player_number == number){
 				map_CodeChips[codes_Roulette_players[i]] += 50 * 5;
 				mass_winners.push_back(codes_Roulette_players[i]);
 			}
@@ -253,19 +292,34 @@ void Guess(map <int, int>& map_CodeChips, vector<int>& codes_Guess_players, int 
 		cout << codes_Guess_players[i] << " ";
 	}
 	cout << ". Welcome to 'Guess' !" << endl;
+	cout << "You have 3 attempts to guess the number"<<endl;
 	vector<int>mass_winners;
 	srand(time(NULL));
 	int number = rand() % 11;
 	for (int i = 0; i < size_codes_Guess_players; ++i) {
 		int player_number = -1;
-		cout << "Player " << codes_Guess_players[i] << " chose number from 0 to 10. ";
-		cin >> player_number;
-		cout << "Your bet is " << player_number << endl;
-		if (player_number == number) {
+		int attempt = 0;
+		bool equal = false;
+		while (attempt != 3 && equal != true) {
+			cout << "Player " << codes_Guess_players[i] << " chose number from 0 to 10. "<<endl;
+			cin >> player_number;
+			cout << "Your bet is " << player_number << endl;
+			if (player_number == number) {
+				equal = true;
+				attempt += 1;
+			}
+			else {
+				cout << "Oops , you've spent " << attempt + 1 << ".You have " << 3 - (attempt + 1) << " more)"<<endl;
+				attempt += 1;
+				
+			}
+		}
+		if (equal) {
 			map_CodeChips[codes_Guess_players[i]] += 50;
 			mass_winners.push_back(codes_Guess_players[i]);
 		}
 		else {
+			cout << "You've spent all attempts "<<endl;
 			map_CodeChips[codes_Guess_players[i]] -= 50;
 		}
 	}

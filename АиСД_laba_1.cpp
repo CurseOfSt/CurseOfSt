@@ -146,18 +146,38 @@ public:
         else return true;
     }
 };
+
+bool is_operand(char val) {
+
+}
+bool is_number(char val) {
+    for (int i = 0; i < 10; i++) {
+        if (val == i) return true;   
+    }
+    return false;  
+}
+
 int main(){
-    my_vector<char>output;
-    stek<char> operands;
+    char operands[7] = { ' + ',' - ', ' * ', ' / ', ' ^ ','sin','cos' };
+    my_vector<char>output_array;
+    stek<char> operands_stek;
     string buffer;
     getline(cin, buffer);
-    
     for (int i = 0; i < buffer.size();i++) {
-        if (buffer[i] != ' ') {
-            
+        char element = buffer[i];
+        if (element != ' ') {
+            if (is_number(element)){
+                output_array.push_back(element);
+            }
+            else if (is_operand(element)) {
+                int type_operand;
+                switch (type_operand) {
+                case 0:
+                };
+            }
         }
     }
-    cout << "Hello World!\n";
+     
 }
 
 // Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"

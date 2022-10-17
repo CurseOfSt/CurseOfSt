@@ -207,7 +207,6 @@ public:
             if (!is_here) return -1;
         }
     }
-    //bool contains(){}
 };
 
 template<typename T>
@@ -267,7 +266,6 @@ bool is_operand(char val) {
     return false;
 }
 int type_operand(char val) {
-    //string operands[7] = { " + "," - ", " * ", " / ", " ^ ","sin","cos"};
     char operands[9] = {'+','-','*','/','^','s','c','(',')'};
     for (int i = 0; i < 9; i++) {
         if (operands[i] == val) {
@@ -287,9 +285,6 @@ bool is_number(char val) {
 bool is_brackets(char val) {
     if (val == '(' || val == ')') return true;
     return false;
-}
-void is_func(char val) {
-
 }
 bool buffer_str_is_right(string str) {
     int prev_ind_oper = -9999;

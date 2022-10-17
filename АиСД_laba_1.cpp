@@ -17,7 +17,7 @@ class my_list {
             this->next = pnext;
         }
     };
-    node<T>* head;
+    node<T>*head;
     void pop_front() {
         node<T>* tmp = head;
         head = head->next;
@@ -80,9 +80,9 @@ public:
     void insert(int index, T data) {
         if (index == 0) push_front();
         if (index == size) push_back();
-        if (index <0 || index >size) cout << "Index out of range" << endl;
+        if (index <0||index >size) cout << "Index out of range" << endl;
         else if (index > 0 && index < size) {
-            node<T>* tmp = this->head;
+            node<T>* tmp = this->head; 
             for (int i = 0; i < index - 1; i++) {
                 tmp = tmp->next;
             }
@@ -113,7 +113,7 @@ class my_vector {
     int capacity;
     T* array_vec;
     void add_capacity() {
-        capacity *= 2;
+        capacity*=2;
         T* tmp = array_vec;
         array_vec = new T[capacity];
         for (int i = 0; i < size; i++) {
@@ -161,7 +161,7 @@ public:
             if (size == capacity) {
                 add_capacity();
             }
-            for (int i = size; i > index; i--) {
+            for (int i = size; i>index; i--) {
                 array_vec[i] = array_vec[i - 1];
             }
             array_vec[index] = data;
@@ -170,7 +170,7 @@ public:
     }
     T reference(int index) {
         if (index > size) {
-            cout << " You index out of range!" << endl;
+            cout<<" You index out of range!" << endl;
         }
         else {
             return array_vec[index];
@@ -207,7 +207,6 @@ public:
             if (!is_here) return -1;
         }
     }
-    //bool contains(){}
 };
 
 template<typename T>
@@ -236,15 +235,15 @@ public:
     T peak() {
         return array_stack[0];
     }
-    T pop() {
+    T pop(){
         T temp = array_stack[0];
         T* tmp = array_stack;
         array_stack = new T[size];
         for (int i = 1; i < size; i++) {
-            array_stack[i - 1] = tmp[i];
+            array_stack[i-1] = tmp[i];
         }
         size -= 1;
-        delete[]tmp;
+        delete[]tmp; 
         return temp;
     }
     void push(T data) {
@@ -260,15 +259,14 @@ public:
 };
 
 bool is_operand(char val) {
-    char operands[7] = { '+','-','*','/','^','s','c' };
+    char operands[7] = { '+','-','*','/','^','s','c'};
     for (int i = 0; i < 7; i++) {
         if ((int)operands[i] == (int)val) return true;
     }
     return false;
 }
 int type_operand(char val) {
-    //string operands[7] = { " + "," - ", " * ", " / ", " ^ ","sin","cos"};
-    char operands[9] = { '+','-','*','/','^','s','c','(',')' };
+    char operands[9] = {'+','-','*','/','^','s','c','(',')'};
     for (int i = 0; i < 9; i++) {
         if (operands[i] == val) {
             if (i == 0 || i == 1) return 1;
@@ -281,30 +279,19 @@ int type_operand(char val) {
     return -1;
 }
 bool is_number(char val) {
-    if ((int)val >= 48 && (int)val <= 57) return true;
-    return false;
+    if ((int)val >= 48 && (int)val <= 57) return true; 
+    return false;  
 }
 bool is_brackets(char val) {
     if (val == '(' || val == ')') return true;
     return false;
 }
-void is_func(char val) {
-
-}
 bool buffer_str_is_right(string str) {
-    int left_br = 0;
-    int right_br = 0;
-    int prev_ind_oper = -1;
-    int prev_ind_num = -1;
+    int prev_ind_oper = -9999;
+    int prev_ind_num = -9999;
     for (int i = 0; i < str.size(); i++) {
-        if (str[i] == '(') {
-            left_br++;
-        }
-        if (str[i] == ')') {
-            right_br++;
-        }
-        if (is_number(str[i])) {
-            if ((i > 0) && ((prev_ind_num == (i - 1)) || ((prev_ind_num == (i - 2)) && ((str[i - 1] == '(') || (str[i - 1] == ')'))))) {
+        if (is_number(str[i])){
+            if ( (i>0)&& ((prev_ind_num == (i - 1)) || ( (prev_ind_num == (i - 2)) && ((str[i - 1] == '(') || (str[i - 1] == ')')) ))  ) {
                 cout << "Error,wrong combination of numbers" << endl;
                 return false;
             }
@@ -312,14 +299,14 @@ bool buffer_str_is_right(string str) {
         }
         if (is_operand(str[i])) {
             if (str[i] == 's') {
-                if (str[i + 1] == 'i' && str[i + 2] == 'n') {
+                if (str[i + 1] == 'i' && str[i + 2] == 'n'){
                     i += 2;
                 }
                 else {
                     cout << "Error,wrong operator 'sin' " << endl;
                     return false;
                 }
-            }
+            } 
             if (str[i] == 'c') {
                 if (str[i + 1] == 'o' && str[i + 2] == 's') {
                     i += 2;
@@ -336,26 +323,12 @@ bool buffer_str_is_right(string str) {
             prev_ind_oper = i;
         }
     }
-    if (left_br == right_br) {
-        return true;
-    }
-    else {
-        if (left_br > right_br) {
-            cout << "Error,wrong amount of Left brackets " << endl;
-            return false;
-        }
-        else {
-            cout << "Error,wrong amount of Right brackets " << endl;
-            return false;
-        }
-    }
+    return true;
 }
 int main() {
     my_vector<char>output_array;
     stack<char> operands_stack;
     string buffer;
-    int left_br = 0;
-    int right_br = 0;
     getline(cin, buffer);
     if (buffer_str_is_right(buffer)) {
         for (int i = 0; i < buffer.size(); i++) {
@@ -365,7 +338,7 @@ int main() {
                     output_array.push_back(element);
                 }
                 else if (is_operand(element)) {
-                    if (output_array.get_size() == 0 && element != 's' && element != 'c') {
+                    if (output_array.get_size() == 0 && element != 's' && element != 'c'){
                         cout << "Error,expression can't start with operator" << endl;
                         return 0;
                     }
@@ -466,19 +439,22 @@ int main() {
                 }
                 else if (is_brackets(element)) {
                     if (element == '(') {
-                        left_br++;
                         operands_stack.push(element);
                     }
                     else if (element == ')') {
                         while (operands_stack.peak() != '(') {
                             if (operands_stack.is_empty()) {
-                                cout << "Error,wrong input 4" << endl;
+                                system("cls");
+                                cout << "Error,wrong amount of Right brackets " << endl;
                                 return 0;
                             }
                             output_array.push_back(operands_stack.pop());
                         }
                         if (operands_stack.peak() == '(') {
                             operands_stack.pop();
+                            if (operands_stack.peak() == 's' || operands_stack.peak() == 'c') {
+                                output_array.push_back(operands_stack.pop());
+                            }
                         }
                     }
                 }
@@ -491,23 +467,17 @@ int main() {
             if (output_array[j] == 'c') {
                 cout << "cos" << " ";
             }
-            else if (output_array[j] != 's' && output_array[j] != 'c') {
+            else if(output_array[j] != 's' && output_array[j] != 'c'){
                 cout << output_array[j] << " ";
             }
         }
         while (operands_stack.is_empty() == 0) {
             cout << operands_stack.pop() << " ";
+            if (operands_stack.peak() == '(') {
+                system("cls");
+                cout << "Error,wrong amount of Left brackets " << endl;
+                return 0;
+            }
         }
     }
 }
-
-// Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
-// Отладка программы: F5 или меню "Отладка" > "Запустить отладку"
-
-// Советы по началу работы 
-//   1. В окне обозревателя решений можно добавлять файлы и управлять ими.
-//   2. В окне Team Explorer можно подключиться к системе управления версиями.
-//   3. В окне "Выходные данные" можно просматривать выходные данные сборки и другие сообщения.
-//   4. В окне "Список ошибок" можно просматривать ошибки.
-//   5. Последовательно выберите пункты меню "Проект" > "Добавить новый элемент", чтобы создать файлы кода, или "Проект" > "Добавить существующий элемент", чтобы добавить в проект существующие файлы кода.
-//   6. Чтобы снова открыть этот проект позже, выберите пункты меню "Файл" > "Открыть" > "Проект" и выберите SLN-файл.

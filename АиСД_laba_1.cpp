@@ -1,16 +1,119 @@
-﻿#include <iostream>
-#include<string>
+#include <iostream>
+#include <string>
 using std::string;
 using std::cout;
 using std::cin;
 using std::endl;
+template<typename T>
+class my_list {
+    int size;
+    template <typename T>
+    class node {
+    public:
+        node* next;
+        T data;
+        node(T data, node* pnext = nullptr) {
+            this->data = data;
+            this->next = pnext;
+        }
+    };
+    node<T>* head;
+    void pop_front() {
+        node<T>* tmp = head;
+        head = head->next;
+        delete tmp;
+        size--;
+    }
+    void clear() {
+        while (size != 0) {
+            pop_front();
+        }
+    }
+public:
+    my_list() {
+        size = 0;
+        head = nullptr;
+    }
+    ~my_list() {
+        clear();
+    }
+    void push_back(T data) {
+        if (head == nullptr) {
+            head = new node<T>(data);
+        }
+        else {
+            node<T>* tmp = this->head;
+            while (tmp->next != nullptr) {
+                tmp = tmp->next;
+            }
+            tmp->next = new node<T>(data);
+        }
+        size++;
+    }
+    void push_front(T data) {
+        head = new node<T>(data, head);
+        size++;
+    }
+    int get_size() {
+        return size;
+    }
+    T& get_reference(int index) {
+        if (index > size) {
+            cout << "Index out of range" << endl;
+        }
+        else {
+            int count = 0;
+            node<T>* tmp = this->head;
+            while (count != index) {
+                tmp = tmp->next;
+                count++;
+            }
+            return tmp->data;
+        }
+    }
+    T& operator[](int index) {
+        if (index > size) {
+            cout << "Index out of range" << endl;
+        }
+        else return get_reference(index);
+    }
+    void insert(int index, T data) {
+        if (index == 0) push_front();
+        if (index == size) push_back();
+        if (index <0 || index >size) cout << "Index out of range" << endl;
+        else if (index > 0 && index < size) {
+            node<T>* tmp = this->head;
+            for (int i = 0; i < index - 1; i++) {
+                tmp = tmp->next;
+            }
+            node<T>* new_node = new node<T>(tmp->next, data);
+            tmp->next = new_node;
+            size++;
+        }
+    }
+    void erase(int index, T data) {
+        if (index == 0) pop_front();
+        if (index <0 || index >size) cout << "Index out of range" << endl;
+        else {
+            node<T>* tmp = head;
+            for (int i = 0; i < index - 1; i++) {
+                tmp = tmp->next;
+            }
+            node<T>* del_element = tmp->next;
+            tmp->next = del_element->next;
+            delete del_element;
+            size--;
+        }
+    }
+};
+
 template<typename T>
 class my_vector {
     int size;
     int capacity;
     T* array_vec;
     void add_capacity() {
-        capacity*=2;
+        capacity *= 2;
         T* tmp = array_vec;
         array_vec = new T[capacity];
         for (int i = 0; i < size; i++) {
@@ -21,8 +124,8 @@ class my_vector {
 public:
     my_vector() {
         size = 0;
-        capacity = 1;
-        array_vec = new T[1];
+        capacity = 8;
+        array_vec = new T[8];
     }
     my_vector(int amount) {
         size = amount;
@@ -38,6 +141,9 @@ public:
     void push_back(T data) {
         if (size == capacity) {
             add_capacity();
+            array_vec[size] = data;
+            size++;
+
         }
         else {
             array_vec[size] = data;
@@ -55,21 +161,22 @@ public:
             if (size == capacity) {
                 add_capacity();
             }
-            for (int i = index + 1; i < size + 1; i++) {
+            for (int i = size; i > index; i--) {
                 array_vec[i] = array_vec[i - 1];
             }
+            array_vec[index] = data;
             size++;
         }
     }
-    int reference(int index) {
+    T reference(int index) {
         if (index > size) {
-            cout<<" You index out of range!" << endl;
+            cout << " You index out of range!" << endl;
         }
         else {
             return array_vec[index];
         }
     }
-    int& operator[](int index) {
+    T& operator[](int index) {
         return array_vec[index];
     }
     void erase(int index, T data) {
@@ -102,82 +209,296 @@ public:
     }
     //bool contains(){}
 };
+
 template<typename T>
-class stek {
+class stack {
     int size;
-    int amount_elements;
-    T* array_stek;
+    T* array_stack;
 public:
-    void stek() {
+    stack() {
         size = 0;
-        array_stek = new T[1];
+        array_stack = new T[1];
     }
-    void stek(int razmer) {
+    stack(int razmer) {
         size = razmer;
-        array_stek = new T[size];
-        amount_elements = 0;
+        array_stack = new T[size];
+    }
+    ~stack() {
+        delete[]array_stack;
+    }
+    bool is_empty() {
+        if (size > 0) return false;
+        else return true;
+    }
+    int get_size() {
+        return size;
     }
     T peak() {
-        return array_stek[0];
+        return array_stack[0];
     }
-    T pop(){
-        amount_elements -= 1;
-        T temp = array_stek[0];
-        T* tmp = array_stek;
-        array_stek = new T[size];
+    T pop() {
+        T temp = array_stack[0];
+        T* tmp = array_stack;
+        array_stack = new T[size];
         for (int i = 1; i < size; i++) {
-            array_stek[i-1] = tmp[i];
+            array_stack[i - 1] = tmp[i];
         }
-        delete[]tmp; 
+        size -= 1;
+        delete[]tmp;
         return temp;
     }
     void push(T data) {
-        amount_elements += 1;
-        T* tmp = array_stek;
-        array_stek = new T[size];
+        size += 1;
+        T* tmp = array_stack;
+        array_stack = new T[size];
         for (int i = 1; i < size; i++) {
-            array_stek[i] = tmp[i - 1];
+            array_stack[i] = tmp[i - 1];
         }
         delete[]tmp;
-        array_stek[0] = data;
-    }
-    bool is_empty() {
-        if (amount_elements > 0) return false;
-        else return true;
+        array_stack[0] = data;
     }
 };
 
 bool is_operand(char val) {
-
-}
-bool is_number(char val) {
-    for (int i = 0; i < 10; i++) {
-        if (val == i) return true;   
+    char operands[7] = { '+','-','*','/','^','s','c' };
+    for (int i = 0; i < 7; i++) {
+        if ((int)operands[i] == (int)val) return true;
     }
-    return false;  
+    return false;
 }
-
-int main(){
-    char operands[7] = { ' + ',' - ', ' * ', ' / ', ' ^ ','sin','cos' };
-    my_vector<char>output_array;
-    stek<char> operands_stek;
-    string buffer;
-    getline(cin, buffer);
-    for (int i = 0; i < buffer.size();i++) {
-        char element = buffer[i];
-        if (element != ' ') {
-            if (is_number(element)){
-                output_array.push_back(element);
-            }
-            else if (is_operand(element)) {
-                int type_operand;
-                switch (type_operand) {
-                case 0:
-                };
-            }
+int type_operand(char val) {
+    //string operands[7] = { " + "," - ", " * ", " / ", " ^ ","sin","cos"};
+    char operands[9] = { '+','-','*','/','^','s','c','(',')' };
+    for (int i = 0; i < 9; i++) {
+        if (operands[i] == val) {
+            if (i == 0 || i == 1) return 1;
+            if (i == 2 || i == 3) return 2;
+            if (i == 4) return 3;
+            if (i == 5 || i == 6) return 4;
+            else return 0;
         }
     }
-     
+    return -1;
+}
+bool is_number(char val) {
+    if ((int)val >= 48 && (int)val <= 57) return true;
+    return false;
+}
+bool is_brackets(char val) {
+    if (val == '(' || val == ')') return true;
+    return false;
+}
+void is_func(char val) {
+
+}
+bool buffer_str_is_right(string str) {
+    int left_br = 0;
+    int right_br = 0;
+    int prev_ind_oper = -1;
+    int prev_ind_num = -1;
+    for (int i = 0; i < str.size(); i++) {
+        if (str[i] == '(') {
+            left_br++;
+        }
+        if (str[i] == ')') {
+            right_br++;
+        }
+        if (is_number(str[i])) {
+            if ((i > 0) && ((prev_ind_num == (i - 1)) || ((prev_ind_num == (i - 2)) && ((str[i - 1] == '(') || (str[i - 1] == ')'))))) {
+                cout << "Error,wrong combination of numbers" << endl;
+                return false;
+            }
+            prev_ind_num = i;
+        }
+        if (is_operand(str[i])) {
+            if (str[i] == 's') {
+                if (str[i + 1] == 'i' && str[i + 2] == 'n') {
+                    i += 2;
+                }
+                else {
+                    cout << "Error,wrong operator 'sin' " << endl;
+                    return false;
+                }
+            }
+            if (str[i] == 'c') {
+                if (str[i + 1] == 'o' && str[i + 2] == 's') {
+                    i += 2;
+                }
+                else {
+                    cout << "Error,wrong operator 'cos' " << endl;
+                    return false;
+                }
+            }
+            else if ((i > 0) && (prev_ind_oper == (i - 1))) {
+                cout << "Error,wrong combination of operators" << endl;
+                return false;
+            }
+            prev_ind_oper = i;
+        }
+    }
+    if (left_br == right_br) {
+        return true;
+    }
+    else {
+        if (left_br > right_br) {
+            cout << "Error,wrong amount of Left brackets " << endl;
+            return false;
+        }
+        else {
+            cout << "Error,wrong amount of Right brackets " << endl;
+            return false;
+        }
+    }
+}
+int main() {
+    my_vector<char>output_array;
+    stack<char> operands_stack;
+    string buffer;
+    int left_br = 0;
+    int right_br = 0;
+    getline(cin, buffer);
+    if (buffer_str_is_right(buffer)) {
+        for (int i = 0; i < buffer.size(); i++) {
+            char element = buffer[i];
+            if (element != ' ') {
+                if (is_number(element)) {
+                    output_array.push_back(element);
+                }
+                else if (is_operand(element)) {
+                    if (output_array.get_size() == 0 && element != 's' && element != 'c') {
+                        cout << "Error,expression can't start with operator" << endl;
+                        return 0;
+                    }
+                    else {
+                        if (operands_stack.is_empty()) {
+                            operands_stack.push(element);
+                        }
+                        else {
+                            int prev_priority = type_operand(operands_stack.peak());
+                            switch (element) {
+                            case '+':
+                            case '-':
+                                if (1 <= prev_priority) {
+                                    int prev_pr = prev_priority;
+                                    while (1 <= prev_pr) {
+                                        output_array.push_back(operands_stack.pop());
+                                        if (operands_stack.is_empty() == 0) {
+                                            prev_pr = type_operand(operands_stack.peak());
+                                        }
+                                        else prev_pr = 0;
+                                    }
+                                    operands_stack.push(element);
+                                }
+                                else {
+                                    operands_stack.push(element);
+                                }
+                                break;
+                            case '*':
+                            case '/':
+                                if (2 <= prev_priority) {
+                                    int prev_pr = prev_priority;
+                                    while (2 <= prev_pr) {
+                                        output_array.push_back(operands_stack.pop());
+                                        if (operands_stack.is_empty() == 0) {
+                                            prev_pr = type_operand(operands_stack.peak());
+                                        }
+                                        else prev_pr = 0;
+                                    }
+                                    operands_stack.push(element);
+                                }
+                                else {
+                                    operands_stack.push(element);
+                                }
+                                break;
+                            case '^':
+                                if (3 <= prev_priority) {
+                                    int prev_pr = prev_priority;
+                                    while (3 <= prev_pr) {
+                                        output_array.push_back(operands_stack.pop());
+                                        if (operands_stack.is_empty() == 0) {
+                                            prev_pr = type_operand(operands_stack.peak());
+                                        }
+                                        else prev_pr = 0;
+                                    }
+                                    operands_stack.push(element);
+                                }
+                                else {
+                                    operands_stack.push(element);
+                                }
+                                break;
+                            case 's':
+                                i += 2;
+                                if (4 <= prev_priority) {
+                                    int prev_pr = prev_priority;
+                                    while (4 <= prev_pr) {
+                                        output_array.push_back(operands_stack.pop());
+                                        if (operands_stack.is_empty() == 0) {
+                                            prev_pr = type_operand(operands_stack.peak());
+                                        }
+                                        else prev_pr = 0;
+                                    }
+                                    operands_stack.push(element);
+                                }
+                                else {
+                                    operands_stack.push(element);
+                                }
+                                break;
+                            case 'c':
+                                i += 2;
+                                if (4 <= prev_priority) {
+                                    int prev_pr = prev_priority;
+                                    while (4 <= prev_pr) {
+                                        output_array.push_back(operands_stack.pop());
+                                        if (operands_stack.is_empty() == 0) {
+                                            prev_pr = type_operand(operands_stack.peak());
+                                        }
+                                        else prev_pr = 0;
+                                    }
+                                    operands_stack.push(element);
+                                }
+                                else {
+                                    operands_stack.push(element);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+                else if (is_brackets(element)) {
+                    if (element == '(') {
+                        left_br++;
+                        operands_stack.push(element);
+                    }
+                    else if (element == ')') {
+                        while (operands_stack.peak() != '(') {
+                            if (operands_stack.is_empty()) {
+                                cout << "Error,wrong input 4" << endl;
+                                return 0;
+                            }
+                            output_array.push_back(operands_stack.pop());
+                        }
+                        if (operands_stack.peak() == '(') {
+                            operands_stack.pop();
+                        }
+                    }
+                }
+            }
+        }
+        for (int j = 0; j < output_array.get_size(); j++) {
+            if (output_array[j] == 's') {
+                cout << "sin" << " ";
+            }
+            if (output_array[j] == 'c') {
+                cout << "cos" << " ";
+            }
+            else if (output_array[j] != 's' && output_array[j] != 'c') {
+                cout << output_array[j] << " ";
+            }
+        }
+        while (operands_stack.is_empty() == 0) {
+            cout << operands_stack.pop() << " ";
+        }
+    }
 }
 
 // Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"

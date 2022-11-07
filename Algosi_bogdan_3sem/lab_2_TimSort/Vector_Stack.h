@@ -26,7 +26,7 @@ public:
     }
     my_vector(int amount) {
         size = amount;
-        capacity = amount*2;
+        capacity = amount*8;
         array_vec = new T[amount];
     }
     ~my_vector() {

@@ -71,35 +71,58 @@ void Merge_runs(my_vector<int>&a,int run1_start,int run1_size,int run2_size) {
 	int i = left_ptr;
 
 	while (Left_iter_a + Right_iter_a < run1_size + run2_size) {
-		if ((Left_iter_a != run1_size) && (Right_iter_a != run2_size)){
+		if ((Left_iter_a != run1_size) && (Right_iter_a != run2_size)) {
 			if ((left_s[Left_iter_a] <= right_s[Right_iter_a])) {
 				a[i] = left_s[Left_iter_a];
 				i++;
 				Left_iter_a++;
 				from_left_in_raw++;
 				from_right_in_raw = 0;
-				if (from_left_in_raw > edge_to_galop) {
+				if (from_left_in_raw == edge_to_galop) {
 					int galop_add = 1;
-					while (left_s[Left_iter_a+galop_add] <= right_s[Right_iter_a] && (Left_iter_a + galop_add) < run1_size) {
-						for (int k = Left_iter_a; k < (Left_iter_a+ galop_add); k++) {
+					while (left_s[Left_iter_a + galop_add] <= right_s[Right_iter_a] && (Left_iter_a + galop_add) < run1_size) {  // при большИх значения выдает ошибку(ломается при массиве от 130 до 140к элементов)
+						for (int k = Left_iter_a; k < (Left_iter_a + galop_add); k++) {
 							a[i] = left_s[k];
 							i++;
 						}
-						Left_iter_a+= galop_add;
-						galop_add +=1;
+						Left_iter_a += galop_add;
+						galop_add += 1;
 					}
+					//бинарный возврат обратно,когда элемент CЛЕВА будет меньше ,чем справа
+					int edge_gallop = (Left_iter_a + run1_size) / 2;
+					if (left_s[edge_gallop] > right_s[Right_iter_a]) {
+						while (left_s[edge_gallop] > right_s[Right_iter_a]) {
+							edge_gallop -= 1;
+						}
+						cout << "Bin search for edge of gallop" << endl;
+						for (int p = Left_iter_a; p <= edge_gallop; p++) {
+							a[i] = left_s[p];
+							i++;
+						}
+						Left_iter_a = edge_gallop + 1;
+					}
+					if (left_s[edge_gallop] == right_s[Right_iter_a]) {
+						while (left_s[edge_gallop] == right_s[Right_iter_a]) {
+							edge_gallop += 1;
+						}
+						for (int p = Left_iter_a; p < edge_gallop; p++) {
+							a[i] = left_s[edge_gallop];
+							i++;
+						}
+					}
+					//
 					from_left_in_raw = 0;
 				}
 			}
 			else {
-				a[i] = right_s[Right_iter_a ];
+				a[i] = right_s[Right_iter_a];
 				i++;
 				Right_iter_a++;
 				from_left_in_raw = 0;
 				from_right_in_raw++;
-				if (from_right_in_raw > edge_to_galop) {
+				if (from_right_in_raw == edge_to_galop) {
 					int galop_add = 1;
-					while (left_s[Left_iter_a] > right_s[Right_iter_a+ galop_add] && (Right_iter_a + galop_add) < run2_size) {
+					while (left_s[Left_iter_a] > right_s[Right_iter_a + galop_add] && (Right_iter_a + galop_add) < run2_size) {
 						for (int k = Right_iter_a; k < Right_iter_a + galop_add; k++) {
 							a[i] = right_s[k];
 							i++;
@@ -107,26 +130,50 @@ void Merge_runs(my_vector<int>&a,int run1_start,int run1_size,int run2_size) {
 						Right_iter_a += galop_add;
 						galop_add += 1;
 					}
+					//бинарный возврат обратно,когда элемент СПРАВА будет меньше ,чем слева
+					int edge_gallop = (Right_iter_a + run2_size) / 2;
+					if (left_s[Left_iter_a] < right_s[edge_gallop]) {
+						while (left_s[Left_iter_a] < right_s[edge_gallop]) {
+							edge_gallop -=1;
+						}
+						cout << "Bin search for edge of gallop" << endl;
+						for (int p = Right_iter_a; p <= edge_gallop; p++) {
+							a[i] = right_s[p];
+							i++;
+						}
+						Right_iter_a = edge_gallop + 1;
+					}
+					if (left_s[Left_iter_a] == right_s[edge_gallop]) {
+						while (left_s[Left_iter_a] == right_s[edge_gallop]) {
+							edge_gallop += 1;
+						}
+						for (int p = Right_iter_a; p < edge_gallop; p++) {
+							a[i] = right_s[p];
+							i++;
+						}
+					}
+					//
 					from_right_in_raw = 0;
 				}
 			}
-		}
-		if (Left_iter_a == run1_size) {
-			while (Right_iter_a < run2_size) {
-				a[i] = right_s[Right_iter_a];
-				i++;
-				Right_iter_a++;
-			}	
-		}
-		if (Right_iter_a == run2_size) {
-			while (Left_iter_a < run1_size) {
-				a[i] = left_s[Left_iter_a];
-				i++;
-				Left_iter_a++;
+			if (Left_iter_a == run1_size) {
+				while (Right_iter_a < run2_size) {
+					a[i] = right_s[Right_iter_a];
+					i++;
+					Right_iter_a++;
+				}
+			}
+			if (Right_iter_a == run2_size) {
+				while (Left_iter_a < run1_size) {
+					a[i] = left_s[Left_iter_a];
+					i++;
+					Left_iter_a++;
+				}
 			}
 		}
 	}
 }
+
 
 void TimSort(my_vector<int>& array, int size) {
 	Run run;
@@ -141,7 +188,6 @@ void TimSort(my_vector<int>& array, int size) {
 	Z.size = 0;
 	int MinRun = get_MinRun(size);
 	for (int i = 1; i < size;) {
-		cout << "Run create" << endl;
 		if (array[i] > array[i - 1]) {
 			while (true) {
 				if ((array[i] > array[i - 1]) && i < size) {
@@ -149,15 +195,15 @@ void TimSort(my_vector<int>& array, int size) {
 					i++;
 				}
 				else {
-					if (run.size < MinRun) {				//можно оптимизировать:если размер run близок к minrun,но начинается 
-						while ((run.size <= MinRun) && i < size) {			// УБЫВ. последовательность,то мы запихнем ее в новый run
+					if (run.size <= MinRun) {				//можно оптимизировать:если размер run близок к minrun,но начинается 
+						while ((run.size < MinRun) && i < size) {			// УБЫВ. последовательность,то мы запихнем ее в новый run
 							run.size++;
 							i++;
 						}
 						insertion_sort(array, run.start_index, run.size);
 					}
 					stack_runs.push(run);
-					cout << "add run : " << "run.start_index " << run.start_index << " ; run.size " << run.size << " ; Stack.size "<< stack_runs.get_size()<<endl;
+					cout << "add run : " << "run.start_index " << run.start_index << " ; run.size " << run.size << " ; Stack.size " << stack_runs.get_size() << endl;
 					run.start_index = i;
 					run.size = 1;
 					i++;
@@ -174,7 +220,7 @@ void TimSort(my_vector<int>& array, int size) {
 				else {
 					reverse(array, run.start_index, run.size);
 					if (run.size < MinRun) {						//можно оптимизировать:если размер run близок к minrun,но начинается 
-						while ((run.size <= MinRun) && i < size) {					// ВОЗРАСТ. последовательность,то мы запихнем ее в новый run
+						while ((run.size < MinRun) && i < size) {					// ВОЗРАСТ. последовательность,то мы запихнем ее в новый run
 							run.size++;
 							i++;
 						}
@@ -189,44 +235,78 @@ void TimSort(my_vector<int>& array, int size) {
 				}
 			}
 		}
-
-
-		if (stack_runs.get_size() == 2) {
+		if (stack_runs.get_size() >= 2) {
 			X = stack_runs.pop();
-
 			Y = stack_runs.pop();
-
-			if (Y.size <= X.size   || Y.size >= X.size) {
-
-				Merge_runs(array, Y.start_index, Y.size, X.size); // меньшие индексы будут у Y-run так как он первее попал в стек.
-				X.start_index = (X.start_index < Y.start_index) ? X.start_index : Y.start_index;
-				X.size += Y.size; //слили X c Y ,то есть минус один run
-				stack_runs.push(X);
+			if (!stack_runs.is_empty()) {
+				Z = stack_runs.peak();
 			}
+			stack_runs.push(Y);
+			stack_runs.push(X);
 		}
-		if (stack_runs.get_size() >= 3) {
-			X = stack_runs.pop();
-			Y = stack_runs.pop();
-			Z = stack_runs.pop();
-			if (Z.size <= X.size + Y.size) {
-
-				if (X.size > Z.size) {
-					Merge_runs(array, Z.start_index, Z.size, Y.size);
-					Y.start_index = (Y.start_index < Z.start_index) ? Y.start_index : Z.start_index;
-					Y.size += Z.size;
+		while ((stack_runs.get_size() >= 2) && ((Y.size <= X.size) || (stack_runs.get_size() >= 3) && (Z.size <= Y.size + X.size))) {
+			cout << "problem 4 " << endl;
+			while ((stack_runs.get_size() >= 2) && (Y.size <= X.size)) {
+				cout << "problem 5 " << endl;
+				Merge_runs(array, Y.start_index, Y.size, X.size); // меньшие индексы будут у Y-run так как он первее попал в стек.
+				Y.start_index = (Y.start_index < X.start_index) ? Y.start_index : X.start_index;
+				Y.size += X.size; //слили X c Y ,то есть минус один run(X)
+				X.size = 0;
+				stack_runs.pop();
+				stack_runs.pop();
+				stack_runs.push(Y);
+				if (stack_runs.get_size() >= 2) {
+					X = stack_runs.pop();
+					Y = stack_runs.pop();
+					if (!stack_runs.is_empty()) {
+						Z = stack_runs.peak();
+					}
 					stack_runs.push(Y);
 					stack_runs.push(X);
 				}
-				else {
-					Merge_runs(array, Y.start_index, Y.size, X.size);
-					X.start_index = (X.start_index < Y.start_index) ? X.start_index : Y.start_index;
-					X.size += Y.size;
+			}
+			while ((stack_runs.get_size() >= 3) && (Z.size <= Y.size + X.size)) {
+				X = stack_runs.pop();
+				Y = stack_runs.pop();
+				Z = stack_runs.pop();
+				cout << "problem 6 " << endl;
+				if (X.size > Z.size) {
+					Merge_runs(array, Z.start_index, Z.size, Y.size);
+					Z.start_index = (Z.start_index < Y.start_index) ? Z.start_index : Y.start_index;
+					Z.size += Y.size; //слили Y c Z ,то есть минус один run(Y)
+					Y.size = 0;
 					stack_runs.push(Z);
 					stack_runs.push(X);
 
 				}
+				else {
+					Merge_runs(array, Y.start_index, Y.size, X.size);
+					X.start_index = (X.start_index < Y.start_index) ? X.start_index : Y.start_index;
+					X.size += Y.size; //слили Y c X ,то есть минус один run(Y)
+					Y.size = 0;
+					stack_runs.push(Z);
+					stack_runs.push(X);
+				}
+				if (stack_runs.get_size() >= 2) {
+					X = stack_runs.pop();
+					Y = stack_runs.pop();
+					if (!stack_runs.is_empty()) {
+						Z = stack_runs.peak();
+					}
+					stack_runs.push(Y);
+					stack_runs.push(X);
+				}
 			}
 		}
+	}
+	// Cливаем оставшиеся runs,  при этом помня,что у Y - меньшие индексы
+	while (stack_runs.get_size() > 1) {
+		X = stack_runs.pop();
+		Y = stack_runs.pop();
+		Merge_runs(array, Y.start_index, Y.size, X.size);
+		Y.start_index = (Y.start_index < X.size) ? Y.start_index : X.start_index;
+		Y.size += X.size;
+		stack_runs.push(Y);
 	}
 }
 
@@ -234,17 +314,19 @@ int main() {
 	srand(time(NULL));
 	int size;
 	cout << "Input the size  - > ";
-	cin >> size;
+	cin>> size;
     my_vector<int> array(size);
 	fill_array(array, size);
 	for (int i = 0; i < size; i++) {
 		cout << array[i] << " ";
 	}
 	cout << endl;
-    cout << endl;
+	cout << endl;
+	cout << endl;
 	TimSort(array, size);
 	for (int i = 0; i < size; i++) {
 		cout << array[i] << " ";
 	}
 }
+
 

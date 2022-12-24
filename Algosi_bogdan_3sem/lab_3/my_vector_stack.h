@@ -7,7 +7,7 @@ template<typename T>
 class my_vector {
     int size;
     int capacity;
-    T* array_vec=nullptr;
+    T* array_vec = nullptr;
     void add_capacity() {
         capacity *= 2;
         T* tmp = array_vec;
@@ -16,7 +16,6 @@ class my_vector {
             array_vec[i] = tmp[i];
         }
         delete[]tmp;
-        array_vec = nullptr;
     }
 public:
     my_vector() {
@@ -26,7 +25,7 @@ public:
     }
     my_vector(int amount) {
         size = amount;
-        capacity = amount*8;
+        capacity = amount * 8;
         array_vec = new T[amount];
     }
     ~my_vector() {
@@ -40,7 +39,6 @@ public:
             add_capacity();
             array_vec[size] = data;
             size++;
-
         }
         else {
             array_vec[size] = data;
@@ -75,6 +73,27 @@ public:
     }
     T& operator[](int index) {
         return array_vec[index];
+    }
+    T pop_front() {
+        if (size > 0) {
+            T temp = array_vec[0];
+            T* tmp = array_vec;
+            array_vec = new T[capacity];
+            for (int i = 0; i < size; i++) {
+                array_vec[i] = tmp[i + 1];
+            }
+            size -= 1;
+            delete[]tmp;
+            return temp;
+        }
+    }
+    void clear() {
+        /*for (int i = 0; i < size; i++) {
+            pop_back();
+        }*/
+        while (size > 0) {
+            erase(0);
+        }
     }
     void erase(int index) {
         if (index >= size) {

@@ -1,12 +1,117 @@
 #pragma once
-#include<iostream>
+#include <iostream>
+#include <string>
+using std::string;
 using std::cout;
+using std::cin;
 using std::endl;
+template<typename T>
+class my_list {
+    int size;
+    template <typename T>
+    class node {
+    public:
+        node* next;
+        T data;
+        node(T data, node* pnext = nullptr) {
+            this->data = data;
+            this->next = pnext;
+        }
+    };
+    node<T>* head;
+    void pop_front() {
+        node<T>* tmp = head;
+        head = head->next;
+        delete tmp;
+        size--;
+    }
+    void clear() {
+        while (size != 0) {
+            pop_front();
+        }
+    }
+public:
+    my_list() {
+        size = 0;
+        head = nullptr;
+    }
+    ~my_list() {
+        clear();
+    }
+    void push_back(T data) {
+        if (head == nullptr) {
+            head = new node<T>(data);
+        }
+        else {
+            node<T>* tmp = this->head;
+            while (tmp->next != nullptr) {
+                tmp = tmp->next;
+            }
+            tmp->next = new node<T>(data);
+        }
+        size++;
+    }
+    void push_front(T data) {
+        head = new node<T>(data, head);
+        size++;
+    }
+    int get_size() {
+        return size;
+    }
+    T& get_reference(int index) {
+        if (index > size) {
+            cout << "Index out of range" << endl;
+        }
+        else {
+            int count = 0;
+            node<T>* tmp = this->head;
+            while (count != index) {
+                tmp = tmp->next;
+                count++;
+            }
+            return tmp->data;
+        }
+    }
+    T& operator[](int index) {
+        if (index > size) {
+            cout << "Index out of range" << endl;
+        }
+        else return get_reference(index);
+    }
+    void insert(int index, T data) {
+        if (index == 0) push_front();
+        if (index == size) push_back();
+        if (index <0 || index >size) cout << "Index out of range" << endl;
+        else if (index > 0 && index < size) {
+            node<T>* tmp = this->head;
+            for (int i = 0; i < index - 1; i++) {
+                tmp = tmp->next;
+            }
+            node<T>* new_node = new node<T>(tmp->next, data);
+            tmp->next = new_node;
+            size++;
+        }
+    }
+    void erase(int index) {
+        if (index == 0) pop_front();
+        if (index <0 || index >size) cout << "Index out of range" << endl;
+        else {
+            node<T>* tmp = head;
+            for (int i = 0; i < index - 1; i++) {
+                tmp = tmp->next;
+            }
+            node<T>* del_element = tmp->next;
+            tmp->next = del_element->next;
+            delete del_element;
+            size--;
+        }
+    }
+};
 
 template<typename T>
 class my_vector {
-    int size;
-    int capacity;
+    int size=0;
+    int capacity=0;
     T* array_vec = nullptr;
     void add_capacity() {
         capacity *= 2;
@@ -29,7 +134,8 @@ public:
         array_vec = new T[amount];
     }
     ~my_vector() {
-        delete[] array_vec;
+        /*delete[] array_vec;*/
+        clear();
     }
     int get_size() {
         return size;
@@ -87,6 +193,20 @@ public:
             return temp;
         }
     }
+    T pop_back() {
+        if (size > 0) {
+            T temp = array_vec[size - 1];
+            T* tmp = array_vec;
+            array_vec = new T[capacity];
+            for (int i = 0; i < size - 1; i++) {
+                array_vec[i] = tmp[i];
+            }
+            size -= 1;
+            /*delete[]tmp;*/
+            return temp;
+        }
+        else cout << "ERROR" << endl;
+    }
     void clear() {
         /*for (int i = 0; i < size; i++) {
             pop_back();
@@ -122,6 +242,13 @@ public:
             }
             if (!is_here) return -1;
         }
+    }
+    void resize(int newsize) {
+        T* tmp = array_vec;
+        size = newsize;
+        capacity = size * 2;
+        array_vec = new T[capacity];
+        delete[]tmp;
     }
 };
 
